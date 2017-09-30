@@ -34,7 +34,7 @@ font-family | name | 必需。规定字体的名称
 src | URL | 必需。定义字体文件的 URL
 
 ### CSS3 2D转换
-
+---
 属性 | 描述
 ---|---
 [transform](https://www.w3cschool.cn/cssref/css3-pr-transform.html) | 适用于2D或3D转换的元素
