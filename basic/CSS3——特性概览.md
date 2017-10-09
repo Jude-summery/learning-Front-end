@@ -79,7 +79,7 @@ to | 指定动画结束时的状态。
 [animation](https://www.w3cschool.cn/cssref/css3-pr-animation.html) | 	所有动画属性的简写属性，动画名称和时间为必选。
 animation-delay | 规定动画何时开始。默认是 0。
 animation-iteration-count | 规定动画被播放的次数。默认是 1，无限为infinite。
-animation-direction | 规定动画的播放方向。默认是 "normal"。reverse为返向播放。alternate为轮播。
+animation-direction | 规定动画的播放方向。默认是 "normal"。reverse为反向播放。alternate为轮播。
 
 ### CSS3 Flex Box
 ---
