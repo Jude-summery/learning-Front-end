@@ -1,11 +1,12 @@
 ### getTag.js
 ---
 ##### 用途
-
 返回表示数据类型的字符串
 
-##### 源码
+##### 引用
+本模块没有引用
 
+##### 源码
 ```
 const toString = Object.prototype.toString
 
