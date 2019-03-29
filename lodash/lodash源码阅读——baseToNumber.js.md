@@ -1,7 +1,7 @@
 ### baseToNumber.js
 ---
 ##### 用途
-改写原生的`toNumber`方法。
+将参数转换为Number类型，主要是为了解决Symbol类型在原生JS中转换为数值类型时报TypeError错误。
 
 ##### 引用
 本模块引用了`isSymbol.js`
