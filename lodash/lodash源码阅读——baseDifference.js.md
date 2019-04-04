@@ -1,52 +1,85 @@
 ### baseDifference.js
 ---
 ##### 用途
-展开多维数组，并返回一个新数组。
+对比参数，返回第一个参数中与第二个参数不同的元素。
 
 ##### 引用
-本模块引用了`isFlattenale.js`,用以判断参数是否为可进行展开操作的数组。
+本模块引用了`SetCache.js、arrayIncludes.js、arrayIncludesWith.js、map.js、cacheHas.js`。
 
 ##### 源码
 ```
-import isFlattenable from './isFlattenable.js'
+import SetCache from './SetCache.js'
+import arrayIncludes from './arrayIncludes.js'
+import arrayIncludesWith from './arrayIncludesWith.js'
+import map from '../map.js'
+import cacheHas from './cacheHas.js'
+
+/** Used as the size to enable large array optimizations. */
+const LARGE_ARRAY_SIZE = 200
 
 /**
- * The base implementation of `flatten` with support for restricting flattening.
+ * The base implementation of methods like `difference` without support
+ * for excluding multiple arrays.
  *
  * @private
- * @param {Array} array The array to flatten.
- * @param {number} depth The maximum recursion depth.
- * @param {boolean} [predicate=isFlattenable] The function invoked per iteration.
- * @param {boolean} [isStrict] Restrict to values that pass `predicate` checks.
- * @param {Array} [result=[]] The initial result value.
- * @returns {Array} Returns the new flattened array.
+ * @param {Array} array The array to inspect.
+ * @param {Array} values The values to exclude.
+ * @param {Function} [iteratee] The iteratee invoked per element.
+ * @param {Function} [comparator] The comparator invoked per element.
+ * @returns {Array} Returns the new array of filtered values.
  */
-function baseFlatten(array, depth, predicate, isStrict, result) {
-  predicate || (predicate = isFlattenable)
-  result || (result = [])
+function baseDifference(array, values, iteratee, comparator) {
+  let includes = arrayIncludes
+  let isCommon = true
+  const result = []
+  const valuesLength = values.length
 
-  if (array == null) {
+  if (!array.length) {
     return result
   }
+  if (iteratee) {
+    values = map(values, (value) => iteratee(value))
+  }
+  if (comparator) {
+    includes = arrayIncludesWith
+    isCommon = false
+  }
+  else if (values.length >= LARGE_ARRAY_SIZE) {
+    includes = cacheHas
+    isCommon = false
+    values = new SetCache(values)
+  }
+  outer:
+  for (let value of array) {
+    const computed = iteratee == null ? value : iteratee(value)
 
-  for (const value of array) {
-    if (depth > 0 && predicate(value)) {
-      if (depth > 1) {
-        // Recursively flatten arrays (susceptible to call stack limits).
-        baseFlatten(value, depth - 1, predicate, isStrict, result)
-      } else {
-        result.push(...value)
+    value = (comparator || value !== 0) ? value : 0
+    if (isCommon && computed === computed) {
+      let valuesIndex = valuesLength
+      while (valuesIndex--) {
+        if (values[valuesIndex] === computed) {
+          continue outer
+        }
       }
-    } else if (!isStrict) {
-      result[result.length] = value
+      result.push(value)
+    }
+    else if (!includes(values, computed, comparator)) {
+      result.push(value)
     }
   }
   return result
 }
 
-export default baseFlatten
+export default baseDifference
 ```
 
 ##### 知识点
-- 递归调用
-- 使用`result[result.length]`动态添加数组元素。
+1. 标记语句`label`
+- 和`break`或`continue`语句一起使用。
+- `label: [语句块]`
+
+2. `continue` —— 终止此次循环，忽略其以下的代码，直接开始下一次循环。
+
+3. `break` —— 立即退出最内层的循环或者`switch`语句。和`continue`一样只能在循环体内使用。
+
+4. `return` —— 立即退出最内层的循环（或函数）并返回一个值。
