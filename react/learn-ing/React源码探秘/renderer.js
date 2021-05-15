@@ -342,18 +342,3 @@ do {
    * 2. 调用该useEffect在本次render时的回调函数
    * 3. 如果存在同步任务，不需要等待下次事件循环的宏任务，提前执行
    */
-
-function* genFn(x){
-  console.log(x)
-  let y = 2 * (yield (x + 1))
-  console.log(y)
-  let z = yield y / 3
-  console.log(z)
-  return x + y + z
-}
-
-let gen = genFn(5)
-gen.next()
-gen.next(12)
-let result = gen.next(13)
-console.log(result.value)
