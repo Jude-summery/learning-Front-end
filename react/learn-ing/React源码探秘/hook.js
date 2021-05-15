@@ -129,6 +129,10 @@ function useState(initialState) {
     // 将update action执行完成后的state作为memoizedState
     hook.memoizedState = baseState;
 
+    /**
+     * dispatchAction.bind(null, hook.queue)实际上只是
+     * (action) => dispatchAction(hook.queue, action)的另一种写法
+     */
     return [baseState, dispatchAction.bind(null, hook.queue)]
 }
 
@@ -139,3 +143,21 @@ function useState(initialState) {
  * 2. React会优化执行过程，可能会跳过某些更新，也会区分优先级
  * 3. 有batchUpdates，对于连续触发的同一个update，会计算好最终状态，只触发一次更新
  */
+
+// React中根据fiber的状态区分iSMount，并将对应dispatcher赋值给全局变量
+
+ReactCurrentDispatcher.current = 
+    current === null || current.memoizedState === null
+        ? HooksDispatcherOnMount
+        : HooksDispatcherOnUpdate;
+
+// Hook的数据结构
+const hook: Hook = {
+    memoizedState: null,
+
+    baseState: null,
+    baseQueue: null,
+    queue: null,
+
+    next: null,
+} 

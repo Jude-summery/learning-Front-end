@@ -79,7 +79,7 @@ function beginWork(
     // mount操作，根据tag，创建不同的子Fiber节点
     switch(workInProgress.tag){
         case FunctionComponent: // 函数组件
-        // ..省略
+        // ..省略，会调用到renderWithHooks方法
         case ClassComponent: // 类组件
         // ..省略
         case HostComponent: // 宿主组件，浏览器中即为DOM
