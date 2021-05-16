@@ -156,7 +156,9 @@ function complateWork(
                  * 3. DANGEROUSLY_SET_INNER_HTML prop
                  * 4.children prop
                  * 
-                 * 在updateHostComponent内部被处理完的props会被赋值给workInProgress.updateQueue
+                 * 在updateHostComponent内部被处理完的props会被
+                 * 以[key1, value1, key2, value2...]的形式
+                 * 赋值给workInProgress.updateQueue
                  * 最终在commit阶段被渲染到页面上
                  */
                 updateHostComponent(
@@ -204,3 +206,40 @@ function complateWork(
         }
     }
 }
+
+function reconcileChildFibers(
+    returnFiber: Fiber, // 父fiber
+    currentFirstChild: Fiber | null, // 当前节点对应的已生成的current fiber
+    newChild: any,
+): Fiber | null {
+    const isObject = typeof newChild === 'object' && newChild !== null;
+
+    if(isObject) {
+        // object 类型， 可能是 REACT_ELEMENT_TYPE 或 REACT_PORTAL_TYPE
+        // TODO: newChild可能是个JSX对象
+        switch(newChild.$$typeof) {
+            case REACT_ELEMENT_TYPE:
+                //调用reconcileSingleElement处理
+            // ...其他case
+        }
+    }
+
+    if(typeof newChild === 'string' || typeof newChild === 'number') {
+        // 调用 reconcileSingleTextNode处理
+    }
+
+    if(isArray(newChild)) {
+        // 调用reconChildrenArray处理
+    }
+
+    //...一些其他情况的处理
+
+    // 以上都没命中，删除节点
+    return deleteRemainingChildren(returnFiber, currentFirstChild)
+}
+
+function reconcileSingleElement(
+    returnFiber: Fiber,
+    currentFirstChild: Fiber | null,
+    element: ReactElement
+)

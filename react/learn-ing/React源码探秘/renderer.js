@@ -313,7 +313,7 @@ do {
     }
   }
 
-  function commitLayoutEffectOnFiber {
+  function commitLayoutEffectOnFiber() {
     // 根据fiber.tag对不同类型节点分别处理
     // 对于ClassComponent， 会通过current === null 区分是mount还是update，调用componentDidMount 或componentDidUpdate
     // 触发状态更新的this.setState如果赋值了第二个参数回调函数，也会在此时调用。
@@ -322,15 +322,15 @@ do {
     switch (finishedWork.tag) {
       // 以下都是FunctionComponent及相关类型
       case FunctionComponent:
-        case ForwardRef:
-          case SimpleMemoComponent:
-            case Block: {
-              // 执行useLayoutEffect的回调函数
-              commmitHookEffectListMount(HookLayout | HookHasEffect, finishedWork);
-              // 调度useEffect的销毁函数与回调函数
-              schedulePassiveEffects(finishedWork);
-              return;
-            }
+      case ForwardRef:
+      case SimpleMemoComponent:
+      case Block: {
+        // 执行useLayoutEffect的回调函数
+        commmitHookEffectListMount(HookLayout | HookHasEffect, finishedWork);
+        // 调度useEffect的销毁函数与回调函数
+        schedulePassiveEffects(finishedWork);
+        return;
+      }
     }
   }
 
@@ -341,4 +341,69 @@ do {
    * 1. 调用该useEffect在上一次render时的销毁函数
    * 2. 调用该useEffect在本次render时的回调函数
    * 3. 如果存在同步任务，不需要等待下次事件循环的宏任务，提前执行
+   * 1,2两步会在layout阶段之后异步执行
    */
+
+// 阶段一：销毁函数的执行
+/**
+ * useEffect会保证在执行完全部的销毁函数之后，再执行回调函数
+ */
+
+// pendingPassiveHookEffectsUnmount中保存了所有需要执行销毁的useEffect
+const unmountEffects = pendingPassiveHookEffectsUnmount;
+pendingPassiveHookEffectsUnmount = [];
+for (let i = 0; i < unmountEffects.length; i += 2) {
+  const effect = ((unmountEffects[i]: any): HookEffect);
+  const fiber = ((unmountEffects[i + 1]: any): Fiber);
+  const distroy = effect.distroy;
+  effect.distroy = undefined;
+
+  if(typeof destroy == 'function') {
+    // 销毁函数存在则执行
+    try {
+      destroy();
+    } catch (error) {
+      captureCommitPhaseError(fiber, error);
+    }
+  }
+}
+
+
+function schedulePassiveEffects(finishedWork: Fiber) {
+  const updateQueue: FunctionComponentUpdateQueue | null = (finishedWork.updateQueue: any);
+  const lastEffect = updateQueue !== null ? updateQueue.lastEffect : null;
+
+  if(lastEffect !== null) {
+    const firstEffect = lastEffect.next;
+    let effect = firstEffect;
+
+    do {
+      const { next, tag } = effect;
+      if(
+        (tag & HookPassive) !== NoHookEffect &&
+        (tag & HookHasEffect) !== NoHookEffect
+       ) {
+         // 向pendingPassiveHookEffectsUnmount数组内push要销毁的effect
+         enqueuePendingPassiveHookEffectUnmount(finishedWork, effect);
+         // 向pendingPassiveHookEffectMount数组内push要执行回调的effect
+         enqueuePendingPassiveHookEffectMount(finishedWork, effect);
+       }
+       effect = next;
+    } while ( effect !== firstEffect );
+  }
+}
+
+// 阶段二： 回调函数的执行
+const mountEffects = pendingPassiveHookEffectsMount;
+pendingPassiveHookEffectsMount = [];
+for(let i = 0; i < mountEffects.length; i += 2) {
+  const effect = ((mountEffects[i]: any): HookEffect);
+  const fiber = ((mountEffects[i + 1]: any): Fiber);
+
+  try {
+    const create = effect.create;
+    effect.distroy = create();
+  } catch (error) {
+    captureCommitPhaseError(fiber, error);
+  }
+}
