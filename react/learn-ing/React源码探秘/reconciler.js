@@ -105,7 +105,17 @@ function beginWork(
 function reconcileChildren(
     current: Fiber | null,
     workInProgress: Fiber,
-    nextChildren: any,
+    /**
+     * 在上一步中根据tag调用不同方法生成,调用workInProgress.type对应的方法，生成ReactElement。
+     * CC-instance.render(),FC-renderWithHooks()，
+     * 根据这个结果去生成workInProgress.child = {
+     *  type: nextChildren.type,
+     *  pendingProps: nextChildren.props
+     * }
+     * 
+     * !!!!!!!!!!!总结：每个Fiber.child都是根据调用Fiber.type生成的值产生的
+     */
+    nextChildren: any, // 可以是ReactElement或者string，number 
     renderLanes: Lanes
 ) {
     if(current === null){
@@ -129,7 +139,10 @@ function reconcileChildren(
 
 /**
  * complateWork()
- * 生成DOM（TODO：应该是VDOM），并拼接成DOM tree
+ * 生成DOM，放入fiber.stateNode中
+ * 
+ * 感觉这里应该只是生成了HostComponent类型节点的stateNode而已，
+ * 打上effectTag（如：Placement）
  */
 
 function complateWork(
@@ -152,7 +165,7 @@ function complateWork(
             return null;
         }
         case HostComponent: {
-            //  生成DOM
+            //  生成DOM，是与平台相关的DOM，里面会调用到react-dom包里的东西
             popHostContext(workInProgress); //TODO
             const rootContainerInstance = getRootHostContainer();
             const type = workInProgress.type; // 节点类型
@@ -323,7 +336,7 @@ function createFiberFromElement(
     }
     const type = element.type;
     const key = element.key;
-    const pendingProps = element.props;
+    const pendingProps = element.props; // 这里面有children
     const fiber = createFiberFromTypeAndProps(
         type,
         key,
