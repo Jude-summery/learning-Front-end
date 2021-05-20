@@ -243,3 +243,41 @@ function reconcileSingleElement(
     currentFirstChild: Fiber | null,
     element: ReactElement
 )
+
+function appendAllChildren(
+    parent: Instance,
+    workInProgress: Fiber,
+    needsVisibilityToggle: boolean,
+    isHidden: boolean,
+){
+    let node = workInProgress.child;
+    while (node !== null) {
+        if(node.tag === HostComponent || node.tag === HostTesx) {
+            appendInitialChild(parent, node.stateNode);
+        } else if (node.tag === HostPortal){
+            // ...略
+        } else if (node.child !== null) {
+            // 如果存在子节点则遍历子节点
+            node.child.return = node;
+            node = node.child;
+            continue;
+        }
+        
+        // 直到当前节点等于循环开始的节点时退出
+        if (node === workInProgress) {
+            return
+        }
+
+        // 当没有兄弟节点时，返回父节点
+        while (node.sibling === null) {
+            if(node.return === null || node.return === workInProgress) {
+                return;
+            }
+            node = node.return;
+        }
+
+        // 有兄弟节点循环兄弟节点
+        node.sibling.return = node.return;
+        node = node.sibling;
+    }
+}
