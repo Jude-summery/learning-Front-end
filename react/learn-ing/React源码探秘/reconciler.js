@@ -107,13 +107,13 @@ function reconcileChildren(
     workInProgress: Fiber,
     /**
      * 在上一步中根据tag调用不同方法生成,调用workInProgress.type对应的方法，生成ReactElement。
-     * CC-instance.render(),FC-renderWithHooks()，
+     * CC-instance.render(),FC-renderWithHooks(),HC-workInProgress.pendingProps.children
      * 根据这个结果去生成workInProgress.child = {
      *  type: nextChildren.type,
      *  pendingProps: nextChildren.props
      * }
      * 
-     * !!!!!!!!!!!总结：每个Fiber.child都是根据调用Fiber.type生成的值产生的
+     * !!!!!!!!!!!总结：每个Fiber.child都是根据调用Fiber.type生成的值再处理后产生的
      */
     nextChildren: any, // 可以是ReactElement或者string，number 
     renderLanes: Lanes
@@ -178,7 +178,7 @@ function complateWork(
                  * 1. 事件回调函数的注册
                  * 2. style prop
                  * 3. DANGEROUSLY_SET_INNER_HTML prop
-                 * 4.children prop
+                 * 4. children prop
                  * 
                  * 在updateHostComponent内部被处理完的props会被
                  * 以[key1, value1, key2, value2...]的形式
