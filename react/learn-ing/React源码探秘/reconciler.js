@@ -19,7 +19,7 @@ function workLoopConcurrent(){
  * performUnitOfWork 创建下一个fiber节点并赋值给workInProgress并将生产的fiber节点连成树
  */
 
-// performUnitOfWork 伪代码
+// performUnitOfWork 伪代码(递归实现)
 // TODO: performUnitOfWork 具体实现
 
 function performUnitOfWork(workInProgress){

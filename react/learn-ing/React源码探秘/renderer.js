@@ -8,7 +8,7 @@ do {
   } while (rootWithPendingPassiveEffects !== null);
 
   // root指 fiberRootNode
-  // root.finishedWork指当前应用的rootFiber
+  // root.finishedWork指当前应用的rootFiber? TODO
   const finishedWork = root.finishedWork;
 
   // 凡是变量名带lane的都是优先级相关
@@ -46,13 +46,13 @@ do {
   }
 
   // 将effectList赋值给firstEffect
-  // 由于每个fiber的effectList只包含他的子孙节点
+  // 由于每个fiber的effectList只包含他的子孙节点 TODO
   // 所以根节点如果有effectTag则不会被包含进来
   // 所以这里将有effectTag的根节点插入到effectList尾部
   // 这样才能保证有effect的fiber都在effectList中
   let firstEffect;
+  // 根节点有effect的情况
   if (finishedWork.effectTag > PerformedWork) {
-    // 根节点有effect的情况
     if (finishedWork.lastEffect !== null) {
         //如果已经存在lastEffect，则把根节点放在effect链的最后
       finishedWork.lastEffect.nextEffect = finishedWork;
