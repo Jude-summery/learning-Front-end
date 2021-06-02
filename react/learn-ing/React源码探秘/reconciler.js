@@ -407,3 +407,5 @@ function appendAllChildren(
         node.sibling.return = node.return;
         node = node.sibling;
     }
+
+// TODO complateWork阶段的effectList是如何构建的

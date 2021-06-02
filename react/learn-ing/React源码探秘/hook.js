@@ -76,8 +76,7 @@ function dispatchAction(queue, action){
      isMount = false;
  }
 
- // 计算state 组件render时会调用useState
-
+// 计算state 组件render时会调用useState
 function useState(initialState) {
     // 当前useState使用的hook会被赋值给该变量
     let hook;
