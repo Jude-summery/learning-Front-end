@@ -7,6 +7,7 @@
 5. [元数据](#metadata)
 6. [变化监测](#changeDetector)
 7. [模板](#template)
+8. [指令](#directive)
 ---
 
 <h3 id="component">组件</h3>
@@ -39,7 +40,7 @@ export class MyComponent{}
 
 ---
 #### 父组件向子组件传递
-1. `@Input()`
+1. `@Input([别名])`
 ```
 import { Input } from '@angular/core';
 // ...
@@ -357,7 +358,8 @@ export class ListItemComponent {
     (ngModelChange)="handler($event)"
 ></input>
 ```
-#### 内置指令
+<h4 id="builtInDirective">内置指令</h4>
+
 > 指令分为 `[属性型指令]` 和 `*结构型指令`
 - `ngClass`
 > 管理多个类名
@@ -408,7 +410,8 @@ trackByContacts(index: number, contact: Contact){
 }
 <div *ngFor="let contact of contacts; trackBy: trackByContacts">{{contact.id}}</div>
 ```
-#### 表单
+<h4 id="form">表单</h4>
+
 1. `ngForm`指令
 > 是表单的控制中心，负责处理表单内的页面逻辑。
 ```
@@ -519,4 +522,91 @@ export class SexReform implements PipeTransform {
     // 需在元数据中引入，之后就能像内置管道一样使用了
     declarations: [SexReform]
 })
+```
+<h3 id="directive">指令</h3>
+
+---
+> 使用方式类似`HTML`元素属性。
+#### 指令分类
+1. 属性指令
+> 通常用来改变元素的外观和行为。
+2. 结构指令
+> 通常用来改变`DOM`树的结构。
+3. 组件
+> 构造视图。
+```
+// 组件
+@Component({
+    selector: 'hello-world',
+    template: '<div>Hello world</div>'
+})
+class HelloWorldComponent {
+    // ...
+}
+
+// 指令
+@Directive({
+    selector: 'myHelloWorld'
+})
+class HelloWordDirective {
+    // ...
+}
+```
+#### 内置指令
+1. [通用指令](#builtInDirective)
+2. [表单指令](#form)
+3. [路由指令](#)
+#### 自定义指令
+基本用法：
+```
+import { Directive, ElementRef, Input } from '@angular/core';
+
+@Directive({
+    selector: '[myBeautifulBackground]'
+})
+export class BeautifulBackgroundDirective {
+    // 指定一个输入属性来接收外部值，实现可配置
+    @Input('myBeautifulBackground') // 为这个输入属性设置别名
+    backgroundColor: string;
+    constructor(el: ElementRef) {
+        el.nativeElement.style.backgroundColor = backgroundColor;
+    }
+}
+
+// 使用时需要在@NgModule的declarations引入自定义指令
+
+// 使用
+<div [myBeautifulBackground]="color"></div>
+```
+响应操作：
+```
+import { Directive, ElementRef, Input, HostListener } from '@angular/core';
+
+@Directive({
+    selector: '[myBeautifulBackground]'
+})
+export class BeautifulBackgroundDirective {
+    private _defaultColor = 'yellow';
+    private el: HTMLElement;
+
+    @Input('myBeautifulBackground') backgroundColor: string;
+
+    constructor(el: ElementRef){
+        // TODO：这里不用this会怎么样
+        this.el = el.nativElement;
+        this.setStyle(this._defaultColor);
+    }
+
+    // @HostListener装饰器指向使用属性指令的DOM元素
+    @HostListener('click') onClick(){
+        this.setStyle(this.backgroundColor || this._defaultColor);
+    }
+
+    private setStyle(color: string){
+        this.el.style.backgroundColor = color;
+    }
+}
+
+// 使用时，点击下面的元素，其颜色就会从黄色变为红色
+<div [myBeautifulBackground]="'red'"></div>
 ```
