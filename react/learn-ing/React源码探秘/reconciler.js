@@ -252,7 +252,7 @@ function reconcileChildFibers(
     }
 
     if(isArray(newChild)) {
-        // 调用reconChildrenArray处理
+        // 调用reconcileChildrenArray处理
     }
 
     //...一些其他情况的处理
