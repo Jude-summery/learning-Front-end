@@ -409,3 +409,36 @@ function appendAllChildren(
     }
 
 // TODO complateWork阶段的effectList是如何构建的
+
+  function reconcileChildrenArray(
+    returnFiber: Fiber,
+    currentFirstChild: Fiber | null,
+    newChildren: Array<*>,
+    lanes: Lanes,
+  ): Fiber | null {
+
+    // 省略
+    // 里面会分多种情况进行处理，在这里我们只看一种
+    if (oldFiber === null) {
+        // 遍历 ReactElement 的数组
+        for (; newIdx < newChildren.length; newIdx++) {
+            // 为数组的每一项生成fiber
+            const newFiber = createChild(returnFiber, newChildren[newIdx], lanes);
+            if (newFiber === null) {
+                continue;
+            }
+            lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
+            // 当生成的 fiber 是第一个 fiber 时赋值给 resultingFirstChild
+            // 当不是时，将它作为前一个 fiber 的 sibling
+            if (previousNewFiber === null) {
+                // TODO: Move out of the loop. This only happens for the first run.
+                resultingFirstChild = newFiber;
+            } else {
+                previousNewFiber.sibling = newFiber;
+            }
+            previousNewFiber = newFiber;
+        }
+        // 返回第一个 fiber 作为 workInProgress
+        return resultingFirstChild;
+    }
+  }
